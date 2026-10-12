@@ -20,7 +20,7 @@ function FitImportedModel({model,selectedId,isolateSelected,categoryFilter,fitRe
  return null;
 }
 
-export default function IfcScene({file,selectedId,onSelect,onMetadata,onDiagnostics,viewMode,showGrid,categoryFilter,isolateSelected,fitRequest}:{file:File;selectedId:number|null;onSelect:(id:number|null)=>void;onMetadata:(m:Record<number,Record<string,string>>)=>void;onDiagnostics:(d:ModelDiagnostics)=>void;viewMode:"realistic"|"technical";showGrid:boolean;categoryFilter:string;isolateSelected:boolean;fitRequest:{target:"model"|"selection";sequence:number}}){
+export default function IfcScene({file,selectedId,onSelect,onMetadata,onDiagnostics,onImportError,viewMode,showGrid,categoryFilter,isolateSelected,fitRequest}:{file:File;selectedId:number|null;onSelect:(id:number|null)=>void;onMetadata:(m:Record<number,Record<string,string>>)=>void;onDiagnostics:(d:ModelDiagnostics)=>void;onImportError:()=>void;viewMode:"realistic"|"technical";showGrid:boolean;categoryFilter:string;isolateSelected:boolean;fitRequest:{target:"model"|"selection";sequence:number}}){
  const [model,setModel]=useState<ImportedIfc|null>(null);
  const [error,setError]=useState<string|null>(null);
  useEffect(()=>{
@@ -32,9 +32,9 @@ export default function IfcScene({file,selectedId,onSelect,onMetadata,onDiagnost
    if(cancelled){loaded.dispose();return;}
    if(loaded.meshes.length===0){loaded.dispose();loaded=null;throw new Error("No displayable geometry found in IFC file.");}
    setModel(loaded);onMetadata(loaded.metadata);onDiagnostics(inspectGeometry(loaded.meshes));
-  }catch(e){if(!cancelled)setError(e instanceof Error?e.message:"IFC model could not be loaded");}})();
+  }catch(e){if(!cancelled){setModel(null);onImportError();setError(e instanceof Error?e.message:"IFC model could not be loaded");}}})().catch(e=>{if(!cancelled){onImportError();setError(e instanceof Error?e.message:"Unexpected IFC import failure");}});
   return()=>{cancelled=true;loaded?.dispose();};
- },[file,onMetadata,onDiagnostics]);
+ },[file,onMetadata,onDiagnostics,onImportError]);
  return <><Canvas camera={{position:[14,12,14],near:0.01,far:10000}} onPointerMissed={()=>onSelect(null)}>
  <color attach="background" args={[viewMode==="realistic"?"#b8cbd5":"#101d2c"]}/><ambientLight intensity={viewMode==="realistic"?1.3:1.8}/><directionalLight position={[10,20,10]} intensity={viewMode==="realistic"?2.1:1.2}/><directionalLight position={[-9,8,-5]} intensity={viewMode==="realistic"?0.65:0.3}/>
  <Bounds margin={1.25}>{model&&<><FitImportedModel model={model} selectedId={selectedId} isolateSelected={isolateSelected} categoryFilter={categoryFilter} fitRequest={fitRequest}/>{model.meshes.filter(m=>(!isolateSelected||selectedId===null||m.expressId===selectedId)&&(categoryFilter==="All"||model.metadata[m.expressId]?.EntityType===categoryFilter)).map((m,i)=>{const material=classifyIfcMaterial(model.metadata[m.expressId],m.color);return <mesh key={i} geometry={m.geometry} onClick={e=>{e.stopPropagation();onSelect(m.expressId)}}><meshStandardMaterial color={selectedId===m.expressId?"#f5b459":viewMode==="realistic"?material.color:"#58bfed"} metalness={viewMode==="realistic"?material.metalness:0.25} roughness={viewMode==="realistic"?material.roughness:0.48} side={2} transparent={m.opacity<1} opacity={m.opacity}/></mesh>})}</>}</Bounds>
