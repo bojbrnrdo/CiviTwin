@@ -1,6 +1,6 @@
 {
   "name": "civitwin",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -15,7 +15,8 @@
     "next": "^15.3.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "three": "^0.176.0"
+    "three": "^0.176.0",
+    "web-ifc": "0.0.74"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
