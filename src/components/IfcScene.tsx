@@ -35,7 +35,7 @@ export default function IfcScene({file,selectedId,onSelect,onMetadata}:{file:Fil
  },[file,onMetadata]);
  return <><Canvas camera={{position:[14,12,14],near:0.01,far:10000}} onPointerMissed={()=>onSelect(null)}>
  <color attach="background" args={["#b8cbd5"]}/><ambientLight intensity={1.3}/><directionalLight position={[10,20,10]} intensity={2}/>
- <Bounds margin={1.25}>{model&&<><FitImportedModel model={model}/>{model.meshes.map((m,i)=><mesh key={i} geometry={m.geometry} onClick={e=>{e.stopPropagation();onSelect(m.expressId)}}><meshStandardMaterial color={selectedId===m.expressId?"#f5b459":m.color} side={2}/></mesh>)}</>}</Bounds>
+ <Bounds margin={1.25}>{model&&<><FitImportedModel model={model}/>{model.meshes.map((m,i)=><mesh key={i} geometry={m.geometry} onClick={e=>{e.stopPropagation();onSelect(m.expressId)}}><meshStandardMaterial color={selectedId===m.expressId?"#f5b459":m.color} side={2} transparent={m.opacity<1} opacity={m.opacity}/></mesh>)}</>}</Bounds>
  <Grid infiniteGrid cellSize={1} sectionSize={5} fadeDistance={80}/><OrbitControls makeDefault/></Canvas>
  {error&&<div role="alert" className="ifcstatus">IFC import error: {error}</div>}
  {!model&&!error&&<div className="ifcstatus">Loading IFC geometry…</div>}</>;
