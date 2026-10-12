@@ -20,7 +20,7 @@ function FitImportedModel({model}:{model:ImportedIfc}){
  return null;
 }
 
-export default function IfcScene({file,selectedId,onSelect,onMetadata,onDiagnostics,viewMode,showGrid,categoryFilter}:{file:File;selectedId:number|null;onSelect:(id:number|null)=>void;onMetadata:(m:Record<number,Record<string,string>>)=>void;onDiagnostics:(d:ModelDiagnostics)=>void;viewMode:"realistic"|"technical";showGrid:boolean;categoryFilter:string}){
+export default function IfcScene({file,selectedId,onSelect,onMetadata,onDiagnostics,viewMode,showGrid,categoryFilter,isolateSelected}:{file:File;selectedId:number|null;onSelect:(id:number|null)=>void;onMetadata:(m:Record<number,Record<string,string>>)=>void;onDiagnostics:(d:ModelDiagnostics)=>void;viewMode:"realistic"|"technical";showGrid:boolean;categoryFilter:string;isolateSelected:boolean}){
  const [model,setModel]=useState<ImportedIfc|null>(null);
  const [error,setError]=useState<string|null>(null);
  useEffect(()=>{
@@ -37,7 +37,7 @@ export default function IfcScene({file,selectedId,onSelect,onMetadata,onDiagnost
  },[file,onMetadata,onDiagnostics]);
  return <><Canvas camera={{position:[14,12,14],near:0.01,far:10000}} onPointerMissed={()=>onSelect(null)}>
  <color attach="background" args={[viewMode==="realistic"?"#b8cbd5":"#101d2c"]}/><ambientLight intensity={viewMode==="realistic"?1.3:1.8}/><directionalLight position={[10,20,10]} intensity={viewMode==="realistic"?2.1:1.2}/><directionalLight position={[-9,8,-5]} intensity={viewMode==="realistic"?0.65:0.3}/>
- <Bounds margin={1.25}>{model&&<><FitImportedModel model={model}/>{model.meshes.filter(m=>categoryFilter==="All"||model.metadata[m.expressId]?.EntityType===categoryFilter).map((m,i)=>{const material=classifyIfcMaterial(model.metadata[m.expressId],m.color);return <mesh key={i} geometry={m.geometry} onClick={e=>{e.stopPropagation();onSelect(m.expressId)}}><meshStandardMaterial color={selectedId===m.expressId?"#f5b459":viewMode==="realistic"?material.color:"#58bfed"} metalness={viewMode==="realistic"?material.metalness:0.25} roughness={viewMode==="realistic"?material.roughness:0.48} side={2} transparent={m.opacity<1} opacity={m.opacity}/></mesh>})}</>}</Bounds>
+ <Bounds margin={1.25}>{model&&<><FitImportedModel model={model}/>{model.meshes.filter(m=>(!isolateSelected||selectedId===null||m.expressId===selectedId)&&(categoryFilter==="All"||model.metadata[m.expressId]?.EntityType===categoryFilter)).map((m,i)=>{const material=classifyIfcMaterial(model.metadata[m.expressId],m.color);return <mesh key={i} geometry={m.geometry} onClick={e=>{e.stopPropagation();onSelect(m.expressId)}}><meshStandardMaterial color={selectedId===m.expressId?"#f5b459":viewMode==="realistic"?material.color:"#58bfed"} metalness={viewMode==="realistic"?material.metalness:0.25} roughness={viewMode==="realistic"?material.roughness:0.48} side={2} transparent={m.opacity<1} opacity={m.opacity}/></mesh>})}</>}</Bounds>
  {showGrid&&<Grid infiniteGrid cellSize={1} sectionSize={5} fadeDistance={80}/>}<OrbitControls makeDefault/></Canvas>
  {error&&<div role="alert" className="ifcstatus">IFC import error: {error}</div>}
  {!model&&!error&&<div className="ifcstatus">Loading IFC geometry…</div>}</>;
