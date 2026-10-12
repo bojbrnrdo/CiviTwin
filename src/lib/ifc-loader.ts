@@ -26,7 +26,9 @@ export async function loadIfc(data:Uint8Array):Promise<ImportedIfc>{
    }
    try{
     const props=api.GetLine(modelId,id,false) as Record<string,unknown>;
-    const out:Record<string,string>={ExpressID:String(id),EntityType:String(props?.type??"Unknown")};
+    const typeCode=typeof props?.type==="number"?props.type:null;
+    const typeNames:Record<number,string>={[IFC.IFCBEAM]:"IfcBeam",[IFC.IFCCOLUMN]:"IfcColumn",[IFC.IFCSLAB]:"IfcSlab",[IFC.IFCWALL]:"IfcWall",[IFC.IFCFOOTING]:"IfcFooting",[IFC.IFCBUILDINGELEMENTPROXY]:"IfcBuildingElementProxy"};
+    const out:Record<string,string>={ExpressID:String(id),EntityType:typeCode===null?"Unknown":(typeNames[typeCode]??`IFC type ${typeCode}`)};
     for(const key of ["Name","Description","GlobalId","ObjectType","PredefinedType"]){
      const value=props?.[key] as {value?:unknown}|undefined;
      if(value && value.value!==undefined)out[key]=String(value.value);
