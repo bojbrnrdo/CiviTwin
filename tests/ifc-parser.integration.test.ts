@@ -99,4 +99,25 @@ describe("web-ifc parser geometry integration",()=>{
    expect(bounds.max.z).toBeCloseTo(-19,2);
   }finally{api.CloseModel(model);}
  },30000);
+ it("rotates a 4 x 2 x 2 m IFC cuboid using its object placement",async()=>{
+  const api=new IfcAPI();await api.Init();
+  const model=api.OpenModel(new Uint8Array(readFileSync(resolve("tests/fixtures/rotated-cuboid-ifc4.ifc"))));
+  try{
+   const bounds=new Box3();
+   api.StreamAllMeshes(model,mesh=>{
+    for(let i=0;i<mesh.geometries.size();i++){
+     const placed=mesh.geometries.get(i),g=api.GetGeometry(model,placed.geometryExpressID);
+     try{
+      const shape=buildIfcGeometry(api.GetVertexArray(g.GetVertexData(),g.GetVertexDataSize()),api.GetIndexArray(g.GetIndexData(),g.GetIndexDataSize()),Array.from(placed.flatTransformation));
+      if(shape.boundingBox)bounds.union(shape.boundingBox);shape.dispose();
+     }finally{g.delete();}
+    }
+   });
+   expect(bounds.isEmpty()).toBe(false);
+   const size=bounds.getSize(new Vector3());
+   expect(size.x).toBeCloseTo(2,2);
+   expect(size.y).toBeCloseTo(2,2);
+   expect(size.z).toBeCloseTo(4,2);
+  }finally{api.CloseModel(model);}
+ },30000);
 });
