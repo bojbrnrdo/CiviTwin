@@ -34,12 +34,16 @@ export default function IfcWorkspace({onReturn}:{onReturn:()=>void}){
  const onPick=async(chosen:File|undefined)=>{
   if(!chosen)return;
   setValidationError(null);
+  try {
   const header=await chosen.slice(0,128).text();
   const issue=validateIfcFile(chosen.name,chosen.size,header);
   if(issue){setValidationError(issue);return;}
   const declaration=await chosen.slice(0,Math.min(chosen.size,1024*1024)).text();
   setUnits(detectIfcLengthUnit(declaration));
   setFitRequest(v=>({target:"model",sequence:v.sequence+1}));setMeta({});setCategoryFilter("All");setIsolateSelected(false);setDiagnostics(null);setSelection(null);setFile(chosen);
+  } catch {
+   setValidationError("Unable to read this IFC file. Please select a readable local .ifc file.");
+  }
  };
  return <section className="importworkspace">
  <div className="importtoolbar"><button onClick={onReturn}>Back to sample</button><label className="upload">Import IFC (max 15 MB)<input type="file" accept=".ifc" onChange={e=>{void onPick(e.target.files?.[0]); e.currentTarget.value="";}}/></label><span className="subtle">Processed in your browser; not uploaded to CiviTwin servers.</span><button type="button" aria-pressed={viewMode==="realistic"} onClick={()=>setViewMode("realistic")}>Material view</button><button type="button" aria-pressed={viewMode==="technical"} onClick={()=>setViewMode("technical")}>Technical view</button><label>Element category <select aria-label="Filter IFC category" value={categoryFilter} onChange={e=>{setCategoryFilter(e.target.value);setSelection(null);setIsolateSelected(false);}}>{categories.map(c=><option key={c} value={c}>{c}</option>)}</select></label><button type="button" disabled={!diagnostics} onClick={()=>setFitRequest(v=>({target:"model",sequence:v.sequence+1}))}>Fit model</button><button type="button" disabled={selection===null} onClick={()=>setFitRequest(v=>({target:"selection",sequence:v.sequence+1}))}>Fit selection</button><button type="button" disabled={selection===null} aria-pressed={isolateSelected&&selection!==null} onClick={()=>setIsolateSelected(v=>!v)}>{isolateSelected&&selection!==null?"Show all elements":"Isolate selected"}</button><button type="button" aria-pressed={showGrid} onClick={()=>setShowGrid(v=>!v)}>{showGrid?"Hide grid":"Show grid"}</button><button type="button" disabled={!diagnostics} onClick={exportReport}>Export diagnostics JSON</button></div>
