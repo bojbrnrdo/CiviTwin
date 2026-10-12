@@ -1,5 +1,4 @@
-import type {BufferGeometry} from "three";
-import type {ModelElement} from "./model";
+import {BufferGeometry,BufferAttribute,Matrix4} from "three";
 
 export type ImportedMesh = {id:number; geometry:BufferGeometry; color:number; expressId:number};
 export type ImportedIfc = {meshes:ImportedMesh[]; metadata:Record<number,Record<string,string>>;dispose:()=>void};
@@ -18,7 +17,6 @@ export async function loadIfc(data:Uint8Array):Promise<ImportedIfc>{
  const metadata:Record<number,Record<string,string>>={};
  const geometries:BufferGeometry[]=[];
  try{
-  const {BufferGeometry,BufferAttribute}=await import("three");
   api.StreamAllMeshes(modelId,(mesh)=>{
    const id=mesh.expressID;
    for(let i=0;i<mesh.geometries.size();i++){
@@ -35,7 +33,6 @@ export async function loadIfc(data:Uint8Array):Promise<ImportedIfc>{
      g.setAttribute("normal",new BufferAttribute(normals,3));
      g.setIndex(new BufferAttribute(index,1));
      const transform=placed.flatTransformation;
-     const {Matrix4}=requireThreeMath();
      const matrix=new Matrix4().fromArray(Array.from(transform));
      g.applyMatrix4(matrix);
      geometries.push(g);
@@ -57,5 +54,3 @@ export async function loadIfc(data:Uint8Array):Promise<ImportedIfc>{
   return {meshes,metadata,dispose:()=>{geometries.forEach(g=>g.dispose());api.CloseModel(modelId);}};
  }catch(error){geometries.forEach(g=>g.dispose());api.CloseModel(modelId);throw error;}
 }
-function requireThreeMath(){return {Matrix4:THREE_Matrix4};}
-import {Matrix4 as THREE_Matrix4} from "three";
