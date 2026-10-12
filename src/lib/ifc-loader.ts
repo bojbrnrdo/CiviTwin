@@ -4,10 +4,14 @@ export type ImportedMesh={id:number;geometry:BufferGeometry;color:number;opacity
 export type ImportedIfc={meshes:ImportedMesh[];metadata:Record<number,Record<string,string>>;dispose:()=>void};
 export async function loadIfc(data:Uint8Array):Promise<ImportedIfc>{
  const IFC=await import("web-ifc");const api=new IFC.IfcAPI();
- api.SetWasmPath("/wasm/");
+ // Use the full browser origin: relative WASM paths can resolve against the bundled JS asset URL.
+ const wasmDirectory=new URL("/wasm/",window.location.origin).href;
+ api.SetWasmPath(wasmDirectory);
  try {
-  const response=await fetch("/wasm/web-ifc.wasm",{method:"HEAD",cache:"no-store"});
+  const response=await fetch(new URL("web-ifc.wasm",wasmDirectory),{method:"GET",cache:"no-store"});
   if(!response.ok)throw new Error(`HTTP ${response.status}`);
+  const prefix=new Uint8Array(await response.arrayBuffer()).slice(0,4);
+  if(prefix.length!==4||prefix[0]!==0||prefix[1]!==97||prefix[2]!==115||prefix[3]!==109)throw new Error("Invalid WASM response");
  }catch(error){throw new Error(`IFC rendering engine could not load /wasm/web-ifc.wasm (${error instanceof Error?error.message:"network error"}). Verify Vercel static assets.`);}
  try{await api.Init();}catch(error){throw new Error(`IFC rendering engine failed to initialize: ${error instanceof Error?error.message:String(error)}`);}
  const modelId=api.OpenModel(data);
