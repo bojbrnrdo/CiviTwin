@@ -8,7 +8,9 @@
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "postinstall": "node scripts/copy-ifc-wasm.mjs"
+    "postinstall": "node scripts/copy-ifc-wasm.mjs",
+    "prebuild": "node scripts/verify-ifc-wasm.mjs",
+    "verify:ifc-wasm": "node scripts/verify-ifc-wasm.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^10.0.0",
