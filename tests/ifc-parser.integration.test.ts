@@ -61,12 +61,12 @@ describe("web-ifc parser geometry integration",()=>{
    });
    expect(bounds.isEmpty()).toBe(false);
    expect(bounds.min.x).toBeCloseTo(9,2);
-   // web-ifc presents IFC Z-up model placements in Three.js Y-up viewer coordinates.
+   // web-ifc maps IFC (X,Y,Z) to viewer (X,Z,-Y) in this parser configuration.
    expect(bounds.min.y).toBeCloseTo(30,2);
-   expect(bounds.min.z).toBeCloseTo(19,2);
+   expect(bounds.min.z).toBeCloseTo(-21,2);
    expect(bounds.max.x).toBeCloseTo(11,2);
    expect(bounds.max.y).toBeCloseTo(32,2);
-   expect(bounds.max.z).toBeCloseTo(21,2);
+   expect(bounds.max.z).toBeCloseTo(-19,2);
   }finally{api.CloseModel(model);}
  },30000);
 });
