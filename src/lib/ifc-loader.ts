@@ -13,7 +13,7 @@ export async function loadIfc(data:Uint8Array):Promise<ImportedIfc>{
  const api=new IFC.IfcAPI();
  api.SetWasmPath("https://cdn.jsdelivr.net/npm/web-ifc@0.0.74/",true);
  await api.Init();
- const modelId=api.OpenModel(data, IFC.DEFAULT);
+ const modelId=api.OpenModel(data);
  const meshes:ImportedMesh[]=[];
  const metadata:Record<number,Record<string,string>>={};
  const geometries:BufferGeometry[]=[];
