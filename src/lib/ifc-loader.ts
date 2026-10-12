@@ -5,7 +5,11 @@ export type ImportedIfc={meshes:ImportedMesh[];metadata:Record<number,Record<str
 export async function loadIfc(data:Uint8Array):Promise<ImportedIfc>{
  const IFC=await import("web-ifc");const api=new IFC.IfcAPI();
  api.SetWasmPath("/wasm/");
- await api.Init();
+ try {
+  const response=await fetch("/wasm/web-ifc.wasm",{method:"HEAD",cache:"no-store"});
+  if(!response.ok)throw new Error(`HTTP ${response.status}`);
+ }catch(error){throw new Error(`IFC rendering engine could not load /wasm/web-ifc.wasm (${error instanceof Error?error.message:"network error"}). Verify Vercel static assets.`);}
+ try{await api.Init();}catch(error){throw new Error(`IFC rendering engine failed to initialize: ${error instanceof Error?error.message:String(error)}`);}
  const modelId=api.OpenModel(data);
  const meshes:ImportedMesh[]=[],metadata:Record<number,Record<string,string>>={},geometries:BufferGeometry[]=[];
  try{
