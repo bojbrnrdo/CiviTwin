@@ -10,7 +10,7 @@ export type ImportedIfc = {meshes:ImportedMesh[]; metadata:Record<number,Record<
 export async function loadIfc(data:Uint8Array):Promise<ImportedIfc>{
  const IFC=await import("web-ifc");
  const api=new IFC.IfcAPI();
- api.SetWasmPath("https://cdn.jsdelivr.net/npm/web-ifc@0.0.74/",true);
+ api.SetWasmPath("/wasm/");
  await api.Init();
  const modelId=api.OpenModel(data);
  const meshes:ImportedMesh[]=[];

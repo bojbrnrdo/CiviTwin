@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "postinstall": "node scripts/copy-ifc-wasm.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^10.0.0",
