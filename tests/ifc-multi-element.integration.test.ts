@@ -24,6 +24,9 @@ describe("IFC4 multi-element model integration",()=>{
     boxes.set(mesh.expressID,box);
    });
    expect(boxes.size).toBe(2);
+   expect([...boxes.keys()].sort((a,b)=>a-b)).toEqual([22,33]);
+   expect((api.GetLine(model,22,false) as {Name?:{value:string}}).Name?.value).toBe("Element A");
+   expect((api.GetLine(model,33,false) as {Name?:{value:string}}).Name?.value).toBe("Element B");
    const centers=[...boxes.values()].map(b=>b.getCenter(new Vector3()).x).sort((a,b)=>a-b);
    expect(centers[0]).toBeCloseTo(10,2);
    expect(centers[1]).toBeCloseTo(16,2);
