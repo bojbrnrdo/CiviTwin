@@ -6,7 +6,6 @@ import {IfcAPI} from "web-ifc";
 describe("web-ifc parser geometry integration",()=>{
  it("opens an IFC4 fixture and triangulates its proxy geometry",async()=>{
   const api=new IfcAPI();
-  api.SetWasmPath(resolve("node_modules/web-ifc")+"/");
   await api.Init();
   const bytes=new Uint8Array(readFileSync(resolve("tests/fixtures/cube-ifc4.ifc")));
   const model=api.OpenModel(bytes);
