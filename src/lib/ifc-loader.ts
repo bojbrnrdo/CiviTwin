@@ -1,5 +1,6 @@
 import {BufferGeometry} from "three";
 import {buildIfcGeometry} from "./ifc-geometry";
+import {getIfcWasmUrl} from "./ifc-engine-health";
 export type ImportedMesh={id:number;geometry:BufferGeometry;color:number;opacity:number;expressId:number};
 export type ImportedIfc={meshes:ImportedMesh[];metadata:Record<number,Record<string,string>>;dispose:()=>void};
 export async function loadIfc(data:Uint8Array):Promise<ImportedIfc>{
@@ -8,7 +9,7 @@ export async function loadIfc(data:Uint8Array):Promise<ImportedIfc>{
  const wasmDirectory=new URL("/wasm/",window.location.origin).href;
  api.SetWasmPath(wasmDirectory,true);
  try {
-  const response=await fetch(new URL("web-ifc.wasm",wasmDirectory),{method:"GET",cache:"no-store"});
+  const response=await fetch(getIfcWasmUrl(window.location.origin),{method:"GET",cache:"no-store"});
   if(!response.ok)throw new Error(`HTTP ${response.status}`);
   const prefix=new Uint8Array(await response.arrayBuffer()).slice(0,4);
   if(prefix.length!==4||prefix[0]!==0||prefix[1]!==97||prefix[2]!==115||prefix[3]!==109)throw new Error("Invalid WASM response");
