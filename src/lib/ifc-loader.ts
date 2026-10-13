@@ -17,6 +17,7 @@ export async function loadIfc(data:Uint8Array):Promise<ImportedIfc>{
  try{await api.Init((file)=>new URL(file,wasmDirectory).href,true);}catch(error){throw new Error(`IFC rendering engine failed to initialize: ${error instanceof Error?error.message:String(error)}`);}
  let modelId:number;
  try{modelId=api.OpenModel(data);}catch(error){throw new Error(`Unable to open IFC model: ${error instanceof Error?error.message:String(error)}`);}
+ if(!Number.isInteger(modelId)||modelId<0)throw new Error("Unable to open IFC model: invalid model handle returned by the IFC engine.");
  const meshes:ImportedMesh[]=[],metadata:Record<number,Record<string,string>>={},geometries:BufferGeometry[]=[];
  try{
   api.StreamAllMeshes(modelId,mesh=>{
