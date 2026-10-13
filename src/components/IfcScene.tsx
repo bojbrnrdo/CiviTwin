@@ -25,13 +25,15 @@ export default function IfcScene({file,selectedId,onSelect,onMetadata,onDiagnost
  const [error,setError]=useState<string|null>(null);
  useEffect(()=>{
   let cancelled=false;let loaded:ImportedIfc|null=null;
-  setModel(null);setError(null);
+  setModel(previous=>{previous?.dispose();return null;});setError(null);
   (async()=>{try{
    const bytes=new Uint8Array(await file.arrayBuffer());
    loaded=await loadIfc(bytes);
    if(cancelled){loaded.dispose();return;}
    if(loaded.meshes.length===0){loaded.dispose();loaded=null;throw new Error("No displayable geometry found in IFC file.");}
-   setModel(loaded);onMetadata(loaded.metadata);onDiagnostics(inspectGeometry(loaded.meshes));
+   const diagnostics=inspectGeometry(loaded.meshes);
+   if(cancelled){loaded.dispose();loaded=null;return;}
+   setModel(loaded);onMetadata(loaded.metadata);onDiagnostics(diagnostics);
   }catch(e){if(!cancelled){setModel(null);onImportError();setError(e instanceof Error?e.message:"IFC model could not be loaded");}}})().catch(e=>{if(!cancelled){onImportError();setError(e instanceof Error?e.message:"Unexpected IFC import failure");}});
   return()=>{cancelled=true;loaded?.dispose();};
  },[file,onMetadata,onDiagnostics,onImportError]);
