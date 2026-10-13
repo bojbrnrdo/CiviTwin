@@ -25,7 +25,7 @@ export default function IfcScene({file,selectedId,onSelect,onMetadata,onDiagnost
  const [error,setError]=useState<string|null>(null);
  useEffect(()=>{
   let cancelled=false;let loaded:ImportedIfc|null=null;
-  setModel(previous=>{previous?.dispose();return null;});setError(null);
+  setModel(null);setError(null);
   (async()=>{try{
    const bytes=new Uint8Array(await file.arrayBuffer());
    loaded=await loadIfc(bytes);
