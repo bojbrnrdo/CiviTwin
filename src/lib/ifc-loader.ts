@@ -15,7 +15,8 @@ export async function loadIfc(data:Uint8Array):Promise<ImportedIfc>{
   if(prefix.length!==4||prefix[0]!==0||prefix[1]!==97||prefix[2]!==115||prefix[3]!==109)throw new Error("Invalid WASM response");
  }catch(error){throw new Error(`IFC rendering engine could not load /wasm/web-ifc.wasm (${error instanceof Error?error.message:"network error"}). Verify Vercel static assets.`);}
  try{await api.Init((file)=>new URL(file,wasmDirectory).href,true);}catch(error){throw new Error(`IFC rendering engine failed to initialize: ${error instanceof Error?error.message:String(error)}`);}
- const modelId=api.OpenModel(data);
+ let modelId:number;
+ try{modelId=api.OpenModel(data);}catch(error){throw new Error(`Unable to open IFC model: ${error instanceof Error?error.message:String(error)}`);}
  const meshes:ImportedMesh[]=[],metadata:Record<number,Record<string,string>>={},geometries:BufferGeometry[]=[];
  try{
   api.StreamAllMeshes(modelId,mesh=>{
